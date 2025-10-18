@@ -4,9 +4,7 @@ const repo = new MateriaRepositorio();
 module.exports = {
   async listar(req, res, next) {
     try {
-      const lista = (await repo.obtenerTodos)
-        ? await repo.obtenerTodos()
-        : await repo.listarPorCarrera(null);
+      const lista = await repo.listarTodos();
       res.json(lista);
     } catch (err) {
       next(err);

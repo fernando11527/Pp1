@@ -6,6 +6,8 @@ Proyecto: API en Node.js usando programacion orientada a objetos. Base de datos:
 
 ## Pasos
 
+Antes que nada, la consola del Visual Studio Code debe estar apuntando al proyecto general donde se encuentra el package.json
+
 1. Preparacion
 
 - Instalar Node.js LTS
@@ -15,6 +17,7 @@ Proyecto: API en Node.js usando programacion orientada a objetos. Base de datos:
 
 - Simplemente ejecuta: `npm install`
 - Esto instala todas las dependencias declaradas en package.json
+- Levanta el proyecto: `npm start`
 
 3. Estructura
 
