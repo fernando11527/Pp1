@@ -8,11 +8,15 @@ const repo = new PeriodoRepositorio();
 // Ruta para consultar el periodo que esta activo
 router.get("/activo", async (req, res, next) => {
   try {
-    const p = await repo.obtenerActivo(); // Busca el periodo activo
-    if (!p) return res.status(404).json({ error: "No hay periodo activo" }); // Si no hay, avisa
-    res.json(p); // Devuelve el periodo activo
+    const { carreraId } = req.query;
+    if (!carreraId || isNaN(Number(carreraId))) {
+      return res.status(400).json({ error: "Debe indicar un carreraId numérico" });
+    }
+    const p = await repo.obtenerActivoPorCarrera(carreraId); // Busca el periodo activo para esa carrera
+    if (!p) return res.status(404).json({ error: "No hay periodo activo para esa carrera" });
+    res.json(p);
   } catch (err) {
-    next(err); // Si algo sale mal, pasa el error al ayudante de errores
+    next(err);
   }
 });
 

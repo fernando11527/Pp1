@@ -93,9 +93,9 @@ class InscripcionServicio {
   // Crea una inscripcion para un alumno en una carrera y materias
   async crearInscripcion({ alumnoId, carreraId, materiasIds, periodoId }) {
     // Valida que el periodo exista y este activo
-    const periodo = periodoId
-      ? await periodoRepo.obtenerPorId(periodoId)
-      : await periodoRepo.obtenerActivo();
+      const periodo = periodoId
+    ? await periodoRepo.obtenerPorId(periodoId)
+    : await periodoRepo.obtenerActivoPorCarrera(carreraId);
     if (!periodo || periodo.activo !== 1)
       throw { status: 400, message: "No existe periodo activo" };
 

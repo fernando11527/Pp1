@@ -76,6 +76,7 @@ function inicializarDB() {
       db.run(`
         CREATE TABLE IF NOT EXISTS periodos (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+           carreraId INTEGER NOT NULL,
           fechaInicio TEXT,
           fechaFin TEXT,
           activo INTEGER DEFAULT 0,
@@ -308,8 +309,8 @@ INSERT INTO profesores (id, nombre, apellido) VALUES
 -- ===========================================
 -- PERIODOS (SEED) - periodo de inscripcion solicitado
 -- ===========================================
-INSERT INTO periodos (id, fechaInicio, fechaFin, activo, cupoLimite) VALUES
-(1, '2025-10-10', '2026-04-30', 1, 200);
+INSERT INTO periodos (id, carreraId, fechaInicio, fechaFin, activo, cupoLimite) VALUES
+(1, 2, '2025-11-01', '2026-04-30', 1, 200); -- Ejemplo para Desarrollo de Software
 
 -- ===========================================
 -- ALUMNOS (SEED)

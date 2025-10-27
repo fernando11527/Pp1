@@ -15,12 +15,12 @@ module.exports = {
 
   async crear(req, res, next) {
     try {
-      const { fechaInicio, fechaFin, activo, cupoLimite } = req.body;
+      const { carreraId, fechaInicio, fechaFin, activo, cupoLimite } = req.body;
       const db = require("../../config/db").getDB();
       const id = await new Promise((resolve, reject) => {
         db.run(
-          `INSERT INTO periodos (fechaInicio, fechaFin, activo, cupoLimite) VALUES (?,?,?,?)`,
-          [fechaInicio, fechaFin, activo ? 1 : 0, cupoLimite],
+          `INSERT INTO periodos (carreraId, fechaInicio, fechaFin, activo, cupoLimite) VALUES (?,?,?,?,?)`,
+          [carreraId, fechaInicio, fechaFin, activo ? 1 : 0, cupoLimite],
           function (err) {
             db.close();
             if (err) return reject(err);
