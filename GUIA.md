@@ -686,7 +686,9 @@ curl -X POST http://localhost:3000/api/admin/materias_aprobadas -H "Content-Type
 
 ```bash
 # 1. Buscar alumno por DNI
-curl -X POST http://localhost:3000/api/alumnos/buscar-dni -H "Content-Type: application/json" -d "{\"dni\":12345678}"
+curl -X POST http://localhost:3000/api/alumnos/buscar-dni ^
+  -H "Content-Type: application/json" ^
+  -d "{\"dni\":\"41342897\"}"
 
 # 2. Verificar periodo activo
 curl http://localhost:3000/api/periodos/activo
@@ -697,8 +699,10 @@ curl http://localhost:3000/api/carreras/2/materias
 # 4. Ver materias posibles para el alumno
 curl "http://localhost:3000/api/alumnos/1/materias-posibles?carreraId=2"
 
-# 5. Crear inscripcion (el alumno puede inscribirse a Matematica II y Programacion II porque aprobo las correlativas)
-curl -X POST http://localhost:3000/api/inscripciones -H "Content-Type: application/json" -d "{\"alumnoId\":1,\"carreraId\":2,\"materiasIds\":[4,5],\"periodoId\":1}"
+# 5. Crear inscripcion
+curl -X POST http://localhost:3000/api/inscripciones ^
+  -H "Content-Type: application/json" ^
+  -d "{\"alumnoId\":1,\"carreraId\":2,\"materiasIds\":[40,41],\"periodoId\":1}"
 ```
 
 ### Paso 11: Verificar inscripcion
