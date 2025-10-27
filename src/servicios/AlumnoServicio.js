@@ -15,7 +15,16 @@ class AlumnoServicio {
     if (!alumno) return null; // Si no existe, devuelve nada
 
     // Trae las materias que el alumno aprobo
-    const sql = `SELECT * FROM materias_aprobadas WHERE alumnoId = ?`;
+   const sql = `
+      SELECT ma.*, 
+             m.nombre AS materiaNombre, 
+             p.nombre AS profesorNombre, 
+             p.apellido AS profesorApellido
+      FROM materias_aprobadas ma
+      JOIN materias m ON ma.materiaId = m.id
+      LEFT JOIN profesores p ON ma.profesorId = p.id
+      WHERE ma.alumnoId = ?
+    `;
     const db = require("../config/db").getDB();
     const materiasAprobadas = await new Promise((resolve, reject) => {
       db.all(sql, [alumno.id], (err, rows) => {
@@ -24,7 +33,17 @@ class AlumnoServicio {
         resolve(rows || []);
       });
     });
-    alumno.materiasAprobadas = materiasAprobadas;
+    alumno.materiasAprobadas = materiasAprobadas.map(ma => ({
+      id: ma.id,
+      materiaId: ma.materiaId,
+      materiaNombre: ma.materiaNombre,
+      estado: ma.estado,
+      nota: ma.nota,
+      fechaUltimoEstado: ma.fechaUltimoEstado,
+      profesorId: ma.profesorId,
+      profesorNombre: ma.profesorNombre ? `${ma.profesorNombre} ${ma.profesorApellido}` : null,
+      periodoId: ma.periodoId
+    }));
 
     // Trae las inscripciones del alumno
     const sql2 = `SELECT * FROM inscripciones WHERE alumnoId = ?`;
@@ -38,10 +57,21 @@ class AlumnoServicio {
     });
     alumno.inscripciones = inscripciones;
 
-    // Trae las carreras (por ahora todas)
-    const carreraRepo = require("../repositorios/CarreraRepositorio");
-    const carrera = new carreraRepo();
-    const carreras = await carrera.listar();
+     // Trae solo las carreras en las que el alumno está inscripto
+    const sql3 = `
+      SELECT c.id, c.nombre
+      FROM alumno_carrera ac
+      JOIN carreras c ON ac.carrera_id = c.id
+      WHERE ac.alumno_id = ?
+    `;
+    const db3 = require("../config/db").getDB();
+    const carreras = await new Promise((resolve, reject) => {
+      db3.all(sql3, [alumno.id], (err, rows) => {
+        db3.close();
+        if (err) return reject(err);
+        resolve(rows || []);
+      });
+    });
     alumno.carreras = carreras;
 
     return alumno; // Devuelve el alumno con toda la info

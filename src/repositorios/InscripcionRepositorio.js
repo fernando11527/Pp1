@@ -50,13 +50,16 @@ class InscripcionRepositorio extends BaseRepositorio {
     if (!ins) return null;
     const db = require("../config/db").getDB();
     const materias = await new Promise((resolve, reject) => {
-      db.all(
-        `SELECT materia_id FROM inscripcion_materia WHERE inscripcion_id = ?`,
+     db.all(
+        `SELECT m.id, m.nombre 
+         FROM inscripcion_materia im
+         JOIN materias m ON im.materia_id = m.id
+         WHERE im.inscripcion_id = ?`,
         [id],
         (err, rows) => {
           db.close();
           if (err) return reject(err);
-          resolve((rows || []).map((r) => r.materia_id));
+          resolve(rows || []);
         }
       );
     });

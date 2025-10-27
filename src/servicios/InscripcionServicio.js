@@ -172,9 +172,21 @@ class InscripcionServicio {
     const periodoObj = await periodoRepo.obtenerPorId(
       periodoId || inscripcionCompleta.periodoId
     );
+    
+      // Formatea la respuesta friendly para materias
+    const materiasFriendly = (inscripcionCompleta.materias || []).map(m => ({
+      id: m.id,
+      nombre: m.nombre
+    }));
 
-    return {
-      inscripcion: inscripcionCompleta,
+   return {
+      inscripcion: {
+        id: inscripcionCompleta.id,
+        fechaInscripcion: inscripcionCompleta.fechaInscripcion,
+        alumnoId: inscripcionCompleta.alumnoId,
+        periodoId: inscripcionCompleta.periodoId,
+        materias: materiasFriendly
+      },
       alumno: alumnoObj,
       periodo: periodoObj,
     };
