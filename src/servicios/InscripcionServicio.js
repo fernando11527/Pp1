@@ -19,16 +19,23 @@ class InscripcionServicio {
 
   // Calcula las materias a las que el alumno se puede anotar
   async materiasPosiblesParaAlumno(alumnoId, carreraId) {
+
+    if (!/^\d+$/.test(String(alumnoId))) {
+      throw { status: 400, message: "ID de alumno inválido. Debe ser numérico." };
+    }
+    if (!/^\d+$/.test(String(carreraId))) {
+      throw { status: 400, message: "ID de carrera inválido. Debe ser numérico." };
+    }
     // Trae las materias de la carrera
     const materias = await materiaRepo.listarPorCarrera(carreraId);
-    
+
     // Trae todas las materias aprobadas del alumno (con sus estados)
     const materiasAlumno = await materiaAprobadaRepo.listarPorAlumno(alumnoId);
-    
+
     // Separa las materias por estado
     const aprobadasIds = new Set(); // Materias que el alumno ya aprobo
     const noPuedeInscribirseIds = new Set(); // Materias donde NO puede inscribirse
-    
+
     materiasAlumno.forEach((ma) => {
       if (ma.estado === "APROBADA") {
         // Si esta aprobada, no se puede anotar nuevamente
@@ -48,11 +55,11 @@ class InscripcionServicio {
       if (noPuedeInscribirseIds.has(m.id)) {
         continue; // No puede anotarse, sigue con la siguiente
       }
-      
+
       // Verifica si cumple con las correlativas
       const correlativas = await this.obtenerCorrelativasRecursivas(m.id);
       const cumpleCorrelativas = correlativas.every((c) => aprobadasIds.has(c));
-      
+
       if (cumpleCorrelativas) {
         posibles.push(m); // Si cumple todo, la agrega a la lista
       }

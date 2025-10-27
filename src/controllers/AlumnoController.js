@@ -17,7 +17,10 @@ module.exports = {
   async buscarPorDni(req, res, next) {
     try {
       const { dni } = req.body; // El usuario manda el DNI en el pedido
-      if (!dni) return res.status(400).json({ error: "Falta dni" }); // Si no manda DNI, se avisa
+      // Validar que el DNI sea string numérico de hasta 8 dígitos
+      if (!dni || typeof dni !== "string" || !/^\d{1,8}$/.test(dni)) {
+        return res.status(400).json({ error: "DNI inválido. Debe ser numérico y hasta 8 dígitos." });
+      }
       const alumno = await alumnoServicio.buscarPorDniConRelacionados(dni); // Se busca el alumno y sus datos
       if (!alumno)
         return res.status(404).json({ error: "Alumno no encontrado" }); // Si no existe, se avisa
@@ -33,6 +36,15 @@ module.exports = {
       const { alumnoId } = req.params; // El id del alumno viene en la direccion del pedido
       const { carreraId } = req.query; // El id de la carrera viene como pregunta
       if (!carreraId) return res.status(400).json({ error: "Falta carreraId" }); // Si falta, se avisa
+
+      // Validar que ambos sean numéricos
+      if (!/^\d+$/.test(alumnoId)) {
+        return res.status(400).json({ error: "ID de alumno inválido. Debe ser numérico." });
+      }
+      if (!/^\d+$/.test(carreraId)) {
+        return res.status(400).json({ error: "ID de carrera inválido. Debe ser numérico." });
+      }
+
       const lista = await inscripcionServicio.materiasPosiblesParaAlumno(
         Number(alumnoId),
         Number(carreraId)
