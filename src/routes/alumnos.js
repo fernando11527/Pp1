@@ -8,6 +8,6 @@ const AlumnoController = require("../controllers/AlumnoController"); // logica p
 router.post("/buscar-dni", AlumnoController.buscarPorDni);
 
 // Ruta para consultar las materias posibles para un alumno
-router.get(":alumnoId/materias-posibles", AlumnoController.materiasPosibles);
+router.get("/:alumnoId/materias-posibles", AlumnoController.materiasPosibles);
 
 module.exports = router; // Exporta el router para que se use en el servidor
