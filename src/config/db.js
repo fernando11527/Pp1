@@ -5,10 +5,14 @@ const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
 
 // Ruta donde se guarda el archivo de la base de datos
-const DB_PATH = path.join(__dirname, "..", "db", "base_de_datos.sqlite");
+const DB_DIR = path.join(__dirname, "..", "db");
+const DB_PATH = path.join(DB_DIR, "base_de_datos.sqlite");
 
 // Funcion para abrir la base de datos
 function getDB() {
+  if (!fs.existsSync(DB_DIR)) {
+    fs.mkdirSync(DB_DIR, { recursive: true });
+  }
   const db = new sqlite3.Database(DB_PATH);
   return db;
 }
