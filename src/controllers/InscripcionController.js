@@ -26,4 +26,29 @@ module.exports = {
       next(err); // Si algo sale mal, se pasa el error al ayudante de errores
     }
   },
+
+  // Verifica si un alumno ya tiene inscripcion en un periodo
+  async verificarInscripcion(req, res, next) {
+    try {
+      const { alumnoId, periodoId } = req.query;
+      
+      // Validar parametros
+      if (!alumnoId || !periodoId) {
+        return res.status(400).json({ error: "Faltan parámetros: alumnoId y periodoId" });
+      }
+
+      // Verificar si existe inscripcion
+      const inscripcion = await inscripcionServicio.verificarInscripcionEnPeriodo(
+        alumnoId, 
+        periodoId
+      );
+
+      res.json({ 
+        yaInscripto: !!inscripcion,
+        inscripcionId: inscripcion ? inscripcion.id : null
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
 };

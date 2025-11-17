@@ -4,6 +4,9 @@ const express = require("express");
 const router = express.Router();
 const InscripcionController = require("../controllers/InscripcionController"); // logica para inscripciones
 
+// Ruta para verificar si un alumno ya esta inscripto en un periodo
+router.get("/verificar", InscripcionController.verificarInscripcion);
+
 // Ruta para crear una inscripcion
 router.post("/", InscripcionController.crear);
 

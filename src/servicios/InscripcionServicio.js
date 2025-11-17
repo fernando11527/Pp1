@@ -67,6 +67,20 @@ class InscripcionServicio {
     return posibles; // Devuelve la lista de materias posibles
   }
 
+  // Verifica si el alumno ya tiene una inscripcion en el periodo dado
+  async verificarInscripcionEnPeriodo(alumnoId, periodoId) {
+    const db = require("../config/db").getDB();
+    const sql = `SELECT id FROM inscripciones WHERE alumnoId = ? AND periodoId = ? LIMIT 1`;
+    const resultado = await new Promise((resolve, reject) => {
+      db.get(sql, [alumnoId, periodoId], (err, row) => {
+        db.close();
+        if (err) return reject(err);
+        resolve(row || null);
+      });
+    });
+    return resultado; // Devuelve la inscripcion si existe, o null si no
+  }
+
   // Busca todas las correlativas de una materia (recursivo, para evitar bucles)
   async obtenerCorrelativasRecursivas(materiaId, visitados = new Set()) {
     if (visitados.has(materiaId)) return []; // Si ya la reviso, no repite
@@ -98,6 +112,15 @@ class InscripcionServicio {
     : await periodoRepo.obtenerActivoPorCarrera(carreraId);
     if (!periodo || periodo.activo !== 1)
       throw { status: 400, message: "No existe periodo activo" };
+
+    // Verifica si el alumno ya tiene una inscripcion en este periodo
+    const inscripcionExistente = await this.verificarInscripcionEnPeriodo(alumnoId, periodo.id);
+    if (inscripcionExistente) {
+      throw { 
+        status: 400, 
+        message: "Ya tienes una inscripción registrada en este período. No puedes inscribirte nuevamente." 
+      };
+    }
 
     // Valida que la fecha sea correcta
     const ahora = new Date();
@@ -154,10 +177,22 @@ class InscripcionServicio {
       const AlumnoRepositorio = require("../repositorios/AlumnoRepositorio");
       const alumnoRepoInstance = new AlumnoRepositorio();
       const alumno = await alumnoRepoInstance.obtenerPorId(alumnoId);
+      
+      // Obtener los nombres completos de las materias
+      const materiasCompletas = await Promise.all(
+        materiasIds.map(async (id) => {
+          const materia = await materiaRepo.obtenerPorId(id);
+          return { id, nombre: materia?.nombre || `Materia ${id}` };
+        })
+      );
+      
       await this.emailService.enviarEmailInscripcion({
         alumno: alumno || { email: null },
-        inscripcion: { id: inscripcionId },
-        materias: materiasIds,
+        inscripcion: { 
+          id: inscripcionId,
+          fechaInscripcion: inscripcion.fechaInscripcion
+        },
+        materias: materiasCompletas,
       });
     } catch (e) {
       console.error("Error al enviar email de inscripcion:", e);
