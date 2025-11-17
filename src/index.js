@@ -2,6 +2,10 @@
 // Este archivo inicializa la aplicacion, configura "middlewares" (ayudantes que procesan los pedidos), rutas y arranca el servidor
 // Proyecto: API Node.js para gestion de inscripciones y materias (Instituto)
 // Para mas detalles ver GUIA.md
+
+// Cargar variables de entorno desde .env
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const { inicializarDB } = require("./config/db");
