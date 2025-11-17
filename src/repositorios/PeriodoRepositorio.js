@@ -8,7 +8,7 @@ class PeriodoRepositorio extends BaseRepositorio {
     const sql = `
       CREATE TABLE IF NOT EXISTS periodos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        carreraId INTEGER NOT NULL,
+        carrera_id INTEGER NOT NULL,
         fechaInicio TEXT,
         fechaFin TEXT,
         activo INTEGER DEFAULT 0,
@@ -18,10 +18,9 @@ class PeriodoRepositorio extends BaseRepositorio {
     return this.ejecutar(sql);
   }
 
-  // Busca el periodo que esta activo
   // Busca el periodo que esta activo para una carrera
   obtenerActivoPorCarrera(carreraId) {
-    const sql = `SELECT * FROM periodos WHERE activo = 1 AND carreraId = ? LIMIT 1`;
+    const sql = `SELECT * FROM periodos WHERE activo = 1 AND carrera_id = ? LIMIT 1`;
     return this.obtenerUno(sql, [carreraId]);
   }
 

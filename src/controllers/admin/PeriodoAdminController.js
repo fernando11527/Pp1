@@ -16,10 +16,11 @@ module.exports = {
   async crear(req, res, next) {
     try {
       const { carreraId, fechaInicio, fechaFin, activo, cupoLimite } = req.body;
+      if (!carreraId) return res.status(400).json({ error: "Falta carreraId" });
       const db = require("../../config/db").getDB();
       const id = await new Promise((resolve, reject) => {
         db.run(
-          `INSERT INTO periodos (carreraId, fechaInicio, fechaFin, activo, cupoLimite) VALUES (?,?,?,?,?)`,
+          `INSERT INTO periodos (carrera_id, fechaInicio, fechaFin, activo, cupoLimite) VALUES (?,?,?,?,?)`,
           [carreraId, fechaInicio, fechaFin, activo ? 1 : 0, cupoLimite],
           function (err) {
             db.close();

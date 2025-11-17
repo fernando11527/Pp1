@@ -80,7 +80,7 @@ function inicializarDB() {
       db.run(`
         CREATE TABLE IF NOT EXISTS periodos (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-           carreraId INTEGER NOT NULL,
+          carrera_id INTEGER NOT NULL,
           fechaInicio TEXT,
           fechaFin TEXT,
           activo INTEGER DEFAULT 0,
@@ -313,7 +313,7 @@ INSERT INTO profesores (id, nombre, apellido) VALUES
 -- ===========================================
 -- PERIODOS (SEED) - periodo de inscripcion solicitado
 -- ===========================================
-INSERT INTO periodos (id, carreraId, fechaInicio, fechaFin, activo, cupoLimite) VALUES
+INSERT INTO periodos (id, carrera_id, fechaInicio, fechaFin, activo, cupoLimite) VALUES
 (1, 2, '2025-11-01', '2026-04-30', 1, 200); -- Ejemplo para Desarrollo de Software
 
 -- ===========================================
@@ -383,21 +383,25 @@ INSERT INTO materias_aprobadas (id, alumnoId, materiaId, estado, nota, fechaUlti
 -- ===========================================
 -- INSCRIPCIONES E INSCRIPCION_MATERIA (ejemplos históricos)
 -- ===========================================
-INSERT INTO inscripciones (id, fechaInscripcion, alumnoId, periodoId) VALUES
-(1,'2025-11-05',1,1),
-(2,'2025-11-06',2,1),
-(3,'2025-11-07',3,1),
-(4,'2025-11-08',4,1),
-(5,'2025-11-09',5,1),
-(6,'2025-11-10',6,1);
+-- COMENTADO: Para poder probar el flujo de inscripcion desde cero
+-- Si descomentas estas lineas, los alumnos ya tendran inscripciones previas
+-- y el sistema los bloqueara por "inscripcion duplicada"
 
-INSERT INTO inscripcion_materia (inscripcion_id, materia_id) VALUES
-(1,40),(1,41),
-(2,29),(2,31),
-(3,32),(3,33),
-(4,29),
-(5,30),(5,31),
-(6,40),(6,43);
+-- INSERT INTO inscripciones (id, fechaInscripcion, alumnoId, periodoId) VALUES
+-- (1,'2025-11-05',1,1),
+-- (2,'2025-11-06',2,1),
+-- (3,'2025-11-07',3,1),
+-- (4,'2025-11-08',4,1),
+-- (5,'2025-11-09',5,1),
+-- (6,'2025-11-10',6,1);
+
+-- INSERT INTO inscripcion_materia (inscripcion_id, materia_id) VALUES
+-- (1,40),(1,41),
+-- (2,29),(2,31),
+-- (3,32),(3,33),
+-- (4,29),
+-- (5,30),(5,31),
+-- (6,40),(6,43);
 
 -- ===========================================
 -- ALUMNO - CARRERA (ASIGNACIONES)
