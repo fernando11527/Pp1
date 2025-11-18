@@ -1,0 +1,21 @@
+# Configuración para Render - Deploy automático
+services:
+  - type: web
+    name: Pp1
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RENDER
+        value: true
+      - key: EMAIL_MODE
+        value: gmail
+      # Las siguientes variables deben configurarse en el dashboard de Render:
+      # - GMAIL_USER
+      # - GMAIL_APP_PASSWORD
+      # - EMAIL_INSTITUCIONAL
+      # - PORT (lo configura Render automáticamente)

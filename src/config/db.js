@@ -5,7 +5,10 @@ const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
 
 // Ruta donde se guarda el archivo de la base de datos
-const DB_DIR = path.join(__dirname, "..", "db");
+// En Render (deployment), usa /tmp que es volátil pero escribible
+// En local, usa la carpeta db/ normal
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+const DB_DIR = isProduction ? '/tmp' : path.join(__dirname, "..", "db");
 const DB_PATH = path.join(DB_DIR, "base_de_datos.sqlite");
 
 // Funcion para abrir la base de datos
