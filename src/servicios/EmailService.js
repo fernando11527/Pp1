@@ -17,15 +17,27 @@ class EmailService {
     if (this.transporter) return this.transporter;
 
     if (this.mode === "gmail") {
-      // Modo Gmail - Envío real
+      // Modo Gmail - Configuración optimizada para Render
       this.transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 465, // SSL directo
+        secure: true, // true para 465, false para otros puertos
         auth: {
           user: process.env.GMAIL_USER,
           pass: process.env.GMAIL_APP_PASSWORD,
         },
+        // Configuración optimizada para hostings
+        pool: false, // No usar pool en Render
+        tls: {
+          rejectUnauthorized: true,
+          minVersion: 'TLSv1.2'
+        },
+        // Timeouts más cortos
+        connectionTimeout: 10000, // 10 segundos
+        greetingTimeout: 5000,    // 5 segundos
+        socketTimeout: 15000       // 15 segundos
       });
-      console.log("📧 EmailService configurado en modo GMAIL");
+      console.log("📧 EmailService configurado en modo GMAIL (Puerto 465/SSL)");
     } else {
       // Modo Ethereal - Testing (crea cuenta temporal automáticamente)
       const testAccount = await nodemailer.createTestAccount();
