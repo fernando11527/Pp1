@@ -71,10 +71,13 @@ class EmailService {
   // Envia email con SendGrid (para Render)
   async enviarConSendGrid({ to, subject, text, html, cc }) {
     try {
+      // Usar el email verificado en SendGrid como remitente
+      const fromEmail = process.env.SENDGRID_FROM_EMAIL || this.fromAddress;
+      
       const msg = {
         to: to,
         from: {
-          email: this.fromAddress,
+          email: fromEmail,
           name: 'Terciario Urquiza'
         },
         subject: subject,
@@ -82,13 +85,16 @@ class EmailService {
         html: html
       };
 
-      // Agregar CC si existe
-      if (cc) {
+      // Agregar CC SOLO si existe Y es diferente del destinatario
+      if (cc && cc !== to) {
         msg.cc = cc;
       }
 
       await sgMail.send(msg);
       console.log("📧 Email enviado via SendGrid a:", to);
+      if (cc && cc !== to) {
+        console.log("   📋 Con copia a:", cc);
+      }
       return true;
     } catch (error) {
       console.error("❌ Error SendGrid:", error.response?.body || error.message);
