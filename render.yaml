@@ -12,8 +12,11 @@ services:
         value: production
       - key: RENDER
         value: true
-      - key: EMAIL_ENABLED
-        value: false
-      # NOTA: Gmail SMTP no funciona en plan gratuito de Render
-      # Para habilitar emails, upgrade a plan pago o usar servicio alternativo
-      # - PORT (lo configura Render automáticamente)
+      # Las siguientes variables DEBEN configurarse en el dashboard de Render:
+      # - SENDGRID_API_KEY (obligatorio - Gmail no funciona en plan free)
+      # Obtener API key en: https://app.sendgrid.com/settings/api_keys
+      # 
+      # SendGrid 100 emails/día gratis
+      # Registrarse en: https://signup.sendgrid.com/
+      #
+      # PORT (lo configura Render automáticamente)

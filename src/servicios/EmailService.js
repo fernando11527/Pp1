@@ -1,7 +1,9 @@
 // Este archivo es el servicio para enviar emails
 // Usa nodemailer con soporte para Gmail (producción) y Ethereal (testing)
+// En Render usa SendGrid por restricciones de puertos SMTP
 
 const nodemailer = require("nodemailer");
+const sgMail = require('@sendgrid/mail');
 
 class EmailService {
   constructor({ fromAddress, institutionalAddress }) {
@@ -10,6 +12,15 @@ class EmailService {
       institutionalAddress || process.env.EMAIL_INSTITUCIONAL || null;
     this.transporter = null;
     this.mode = process.env.EMAIL_MODE || "ethereal"; // 'ethereal' o 'gmail'
+    
+    // Configurar SendGrid si está disponible (para Render)
+    if (process.env.SENDGRID_API_KEY) {
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      this.useSendGrid = true;
+      console.log("📧 EmailService configurado con SENDGRID API");
+    } else {
+      this.useSendGrid = false;
+    }
   }
 
   // Crea el transporter (configuración de envío) según el modo
@@ -57,11 +68,37 @@ class EmailService {
     return this.transporter;
   }
 
+  // Envia email con SendGrid (para Render)
+  async enviarConSendGrid({ to, subject, text, html, cc }) {
+    try {
+      const msg = {
+        to: to,
+        from: {
+          email: this.fromAddress,
+          name: 'Terciario Urquiza'
+        },
+        subject: subject,
+        text: text,
+        html: html
+      };
+
+      // Agregar CC si existe
+      if (cc) {
+        msg.cc = cc;
+      }
+
+      await sgMail.send(msg);
+      console.log("📧 Email enviado via SendGrid a:", to);
+      return true;
+    } catch (error) {
+      console.error("❌ Error SendGrid:", error.response?.body || error.message);
+      return false;
+    }
+  }
+
   // Envia email de confirmacion de inscripcion
   async enviarEmailInscripcion({ alumno, inscripcion, materias }) {
     try {
-      const transporter = await this.getTransporter();
-
       // Si no hay email del alumno, solo registrar y no enviar
       if (!alumno.email) {
         console.log("⚠️ No se puede enviar email: alumno sin email");
@@ -173,17 +210,30 @@ Instituto Terciario Urquiza
         mailOptions.cc = this.institutionalAddress;
       }
 
-      const info = await transporter.sendMail(mailOptions);
-
-      // En modo Ethereal, mostrar link para ver el email
-      if (this.mode === "ethereal") {
-        console.log("📧 Email de inscripción (TEST) enviado");
-        console.log("🔗 Ver email en: " + nodemailer.getTestMessageUrl(info));
+      // Usar SendGrid si está configurado (para Render), sino usar Nodemailer
+      if (this.useSendGrid) {
+        return await this.enviarConSendGrid({
+          to: alumno.email,
+          subject: mailOptions.subject,
+          text: mailOptions.text,
+          html: mailOptions.html,
+          cc: mailOptions.cc
+        });
       } else {
-        console.log("📧 Email de inscripción enviado a:", alumno.email);
-      }
+        // Usar Nodemailer (Gmail o Ethereal)
+        const transporter = await this.getTransporter();
+        const info = await transporter.sendMail(mailOptions);
 
-      return true;
+        // En modo Ethereal, mostrar link para ver el email
+        if (this.mode === "ethereal") {
+          console.log("📧 Email de inscripción (TEST) enviado");
+          console.log("🔗 Ver email en: " + nodemailer.getTestMessageUrl(info));
+        } else {
+          console.log("📧 Email de inscripción enviado a:", alumno.email);
+        }
+
+        return true;
+      }
     } catch (error) {
       console.error("❌ Error al enviar email de inscripción:", error);
       return false;
@@ -281,16 +331,27 @@ Instituto Terciario Urquiza
         `,
       };
 
-      const info = await transporter.sendMail(mailOptions);
-
-      if (this.mode === "ethereal") {
-        console.log("📧 Resumen diario (TEST) enviado");
-        console.log("🔗 Ver email en: " + nodemailer.getTestMessageUrl(info));
+      // Usar SendGrid si está configurado, sino usar Nodemailer
+      if (this.useSendGrid) {
+        return await this.enviarConSendGrid({
+          to: this.institutionalAddress,
+          subject: mailOptions.subject,
+          text: mailOptions.text,
+          html: mailOptions.html
+        });
       } else {
-        console.log("📧 Resumen diario enviado a:", this.institutionalAddress);
-      }
+        const transporter = await this.getTransporter();
+        const info = await transporter.sendMail(mailOptions);
 
-      return true;
+        if (this.mode === "ethereal") {
+          console.log("📧 Resumen diario (TEST) enviado");
+          console.log("🔗 Ver email en: " + nodemailer.getTestMessageUrl(info));
+        } else {
+          console.log("📧 Resumen diario enviado a:", this.institutionalAddress);
+        }
+
+        return true;
+      }
     } catch (error) {
       console.error("❌ Error al enviar resumen diario:", error);
       return false;
