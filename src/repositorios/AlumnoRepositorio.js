@@ -57,6 +57,16 @@ class AlumnoRepositorio extends BaseRepositorio {
     return this.obtenerTodos(sql);
   }
 
+  // Actualiza los campos de un alumno por id
+  actualizar(id, data) {
+    return this.actualizarPorId('alumnos', id, data);
+  }
+
+  // Elimina un alumno por id
+  eliminar(id) {
+    return this.eliminarPorId('alumnos', id);
+  }
+
   // Busca un alumno por id y adjunta materiasAprobadas, inscripciones y carreras
   async buscarConRelacionados(id) {
     const alumno = await this.obtenerPorId(id);

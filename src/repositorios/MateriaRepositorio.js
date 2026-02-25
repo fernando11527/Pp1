@@ -44,6 +44,16 @@ class MateriaRepositorio extends BaseRepositorio {
     return this.obtenerTodos(sql);
   }
 
+  // Actualiza los campos de una materia por id
+  actualizar(id, data) {
+    return this.actualizarPorId('materias', id, data);
+  }
+
+  // Elimina una materia por id
+  eliminar(id) {
+    return this.eliminarPorId('materias', id);
+  }
+
   // Correlativas directas de una materia
   listarCorrelativasDe(materiaId) {
     const sql = `SELECT correlativa_id FROM correlativas WHERE materia_id = ?`;

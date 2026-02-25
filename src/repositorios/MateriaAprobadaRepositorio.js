@@ -40,6 +40,26 @@ class MateriaAprobadaRepositorio extends BaseRepositorio {
     const sql = `SELECT * FROM materias_aprobadas WHERE alumnoId = ?`;
     return this.obtenerTodos(sql, [alumnoId]);
   }
+
+  // Devuelve todas las materias aprobadas
+  listarTodos() {
+    return this.obtenerTodos(`SELECT * FROM materias_aprobadas`);
+  }
+
+  // Busca una materia aprobada por id
+  obtenerPorId(id) {
+    return this.obtenerUno(`SELECT * FROM materias_aprobadas WHERE id = ?`, [id]);
+  }
+
+  // Actualiza los campos de una materia aprobada por id
+  actualizar(id, data) {
+    return this.actualizarPorId('materias_aprobadas', id, data);
+  }
+
+  // Elimina una materia aprobada por id
+  eliminar(id) {
+    return this.eliminarPorId('materias_aprobadas', id);
+  }
 }
 
 module.exports = MateriaAprobadaRepositorio;

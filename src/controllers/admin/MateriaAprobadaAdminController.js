@@ -4,91 +4,40 @@ const repo = new MateriaAprobadaRepo();
 module.exports = {
   async listar(req, res, next) {
     try {
-      const lista = (await repo.obtenerTodos)
-        ? await repo.obtenerTodos()
-        : await repo.listarPorAlumno(req.query.alumnoId || null);
+      const { alumnoId } = req.query;
+      const lista = alumnoId
+        ? await repo.listarPorAlumno(alumnoId)
+        : await repo.listarTodos();
       res.json(lista);
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
   },
 
   async crear(req, res, next) {
     try {
-      const data = req.body;
-      const id = await repo.crear(data);
+      const id = await repo.crear(req.body);
       res.json({ id });
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
   },
 
   async obtener(req, res, next) {
     try {
-      const { id } = req.params;
-      const db = require("../../config/db").getDB();
-      const row = await new Promise((resolve, reject) => {
-        db.get(
-          `SELECT * FROM materias_aprobadas WHERE id = ?`,
-          [id],
-          (err, row) => {
-            db.close();
-            if (err) return reject(err);
-            resolve(row);
-          }
-        );
-      });
-      if (!row) return res.status(404).json({ error: "No encontrado" });
-      res.json(row);
-    } catch (err) {
-      next(err);
-    }
+      const obj = await repo.obtenerPorId(req.params.id);
+      if (!obj) return res.status(404).json({ error: 'No encontrado' });
+      res.json(obj);
+    } catch (err) { next(err); }
   },
 
   async actualizar(req, res, next) {
     try {
-      const { id } = req.params;
-      const data = req.body;
-      const db = require("../../config/db").getDB();
-      const sets = Object.keys(data)
-        .map((k) => `${k} = ?`)
-        .join(", ");
-      const params = Object.values(data).concat([id]);
-      await new Promise((resolve, reject) => {
-        db.run(
-          `UPDATE materias_aprobadas SET ${sets} WHERE id = ?`,
-          params,
-          function (err) {
-            db.close();
-            if (err) return reject(err);
-            resolve(this.changes);
-          }
-        );
-      });
+      await repo.actualizar(req.params.id, req.body);
       res.json({ ok: true });
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
   },
 
   async eliminar(req, res, next) {
     try {
-      const { id } = req.params;
-      const db = require("../../config/db").getDB();
-      await new Promise((resolve, reject) => {
-        db.run(
-          `DELETE FROM materias_aprobadas WHERE id = ?`,
-          [id],
-          function (err) {
-            db.close();
-            if (err) return reject(err);
-            resolve(this.changes);
-          }
-        );
-      });
+      await repo.eliminar(req.params.id);
       res.json({ ok: true });
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
   },
 };

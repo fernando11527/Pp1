@@ -35,6 +35,24 @@ class PeriodoRepositorio extends BaseRepositorio {
     const sql = `SELECT * FROM periodos`;
     return this.obtenerTodos(sql);
   }
+
+  // Agrega un periodo nuevo
+  crear(data) {
+    return this.ejecutar(
+      `INSERT INTO periodos (carrera_id, fechaInicio, fechaFin, activo, cupoLimite) VALUES (?,?,?,?,?)`,
+      [data.carrera_id, data.fechaInicio, data.fechaFin, data.activo ? 1 : 0, data.cupoLimite]
+    );
+  }
+
+  // Actualiza los campos de un periodo por id
+  actualizar(id, data) {
+    return this.actualizarPorId('periodos', id, data);
+  }
+
+  // Elimina un periodo por id
+  eliminar(id) {
+    return this.eliminarPorId('periodos', id);
+  }
 }
 
 module.exports = PeriodoRepositorio;

@@ -67,6 +67,28 @@ class InscripcionRepositorio extends BaseRepositorio {
     return ins;
   }
 
+  // Agrega una materia a una inscripción (INSERT OR IGNORE)
+  agregarMateria(inscripcionId, materiaId) {
+    return this.ejecutar(
+      `INSERT OR IGNORE INTO inscripcion_materia (inscripcion_id, materia_id) VALUES (?,?)`,
+      [inscripcionId, materiaId]
+    );
+  }
+
+  // Quita una materia de una inscripción
+  quitarMateria(inscripcionId, materiaId) {
+    return this.ejecutar(
+      `DELETE FROM inscripcion_materia WHERE inscripcion_id = ? AND materia_id = ?`,
+      [inscripcionId, materiaId]
+    );
+  }
+
+  // Elimina una inscripción y sus materias asociadas
+  async eliminar(id) {
+    await this.ejecutar(`DELETE FROM inscripcion_materia WHERE inscripcion_id = ?`, [id]);
+    return this.ejecutar(`DELETE FROM inscripciones WHERE id = ?`, [id]);
+  }
+
   // Verifica si ya existe una inscripción para el alumno en el periodo
   buscarPorAlumnoYPeriodo(alumnoId, periodoId) {
     const sql = `SELECT id FROM inscripciones WHERE alumnoId = ? AND periodoId = ? LIMIT 1`;

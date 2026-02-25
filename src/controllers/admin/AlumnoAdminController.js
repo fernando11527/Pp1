@@ -34,25 +34,8 @@ module.exports = {
 
   async actualizar(req, res, next) {
     try {
-      // para simplicidad vamos a permitir solo campos directos con UPDATE simple
       const { id } = req.params;
-      const data = req.body;
-      const db = require("../../config/db").getDB();
-      const sets = Object.keys(data)
-        .map((k) => `${k} = ?`)
-        .join(", ");
-      const params = Object.values(data).concat([id]);
-      await new Promise((resolve, reject) => {
-        db.run(
-          `UPDATE alumnos SET ${sets} WHERE id = ?`,
-          params,
-          function (err) {
-            db.close();
-            if (err) return reject(err);
-            resolve(this.changes);
-          }
-        );
-      });
+      await repo.actualizar(id, req.body);
       res.json({ ok: true });
     } catch (err) {
       next(err);
@@ -62,14 +45,7 @@ module.exports = {
   async eliminar(req, res, next) {
     try {
       const { id } = req.params;
-      const db = require("../../config/db").getDB();
-      await new Promise((resolve, reject) => {
-        db.run(`DELETE FROM alumnos WHERE id = ?`, [id], function (err) {
-          db.close();
-          if (err) return reject(err);
-          resolve(this.changes);
-        });
-      });
+      await repo.eliminar(id);
       res.json({ ok: true });
     } catch (err) {
       next(err);

@@ -43,6 +43,18 @@ class BaseRepositorio {
       });
     });
   }
+
+  // Actualiza un registro por id con un objeto de campos dinámicos
+  actualizarPorId(tabla, id, data) {
+    const sets = Object.keys(data).map(k => `${k} = ?`).join(', ');
+    const params = [...Object.values(data), id];
+    return this.ejecutar(`UPDATE ${tabla} SET ${sets} WHERE id = ?`, params);
+  }
+
+  // Elimina un registro por id
+  eliminarPorId(tabla, id) {
+    return this.ejecutar(`DELETE FROM ${tabla} WHERE id = ?`, [id]);
+  }
 }
 
 module.exports = BaseRepositorio;

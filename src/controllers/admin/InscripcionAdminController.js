@@ -4,76 +4,51 @@ const repo = new InscripcionRepositorio();
 module.exports = {
   async listar(req, res, next) {
     try {
-      const lista = await repo.listarTodos();
-      res.json(lista);
-    } catch (err) {
-      next(err);
-    }
+      res.json(await repo.listarTodos());
+    } catch (err) { next(err); }
   },
 
   async obtener(req, res, next) {
     try {
-      const { id } = req.params;
-      const obj = await repo.obtenerConMaterias(id);
-      if (!obj) return res.status(404).json({ error: "No encontrado" });
+      const obj = await repo.obtenerConMaterias(req.params.id);
+      if (!obj) return res.status(404).json({ error: 'No encontrado' });
       res.json(obj);
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
   },
 
   async crear(req, res, next) {
     try {
-      const data = req.body; // { alumnoId, periodoId, materiasIds }
-      const ins = {
+      const { alumnoId, periodoId, materiasIds } = req.body;
+      const id = await repo.crear({
         fechaInscripcion: new Date().toISOString(),
-        alumnoInscriptoId: data.alumnoId,
-        periodoId: data.periodoId,
-      };
-      const id = await repo.crear(ins);
-      // insertar materias
-      const db = require("../../config/db").getDB();
-      await new Promise((resolve, reject) => {
-        const stmt = db.prepare(
-          `INSERT INTO inscripcion_materia (inscripcion_id, materia_id) VALUES (?,?)`
-        );
-        for (const m of data.materiasIds || []) stmt.run(id, m);
-        stmt.finalize((err) => {
-          db.close();
-          if (err) return reject(err);
-          resolve();
-        });
+        alumnoInscriptoId: alumnoId,
+        periodoId,
       });
+      await repo.agregarMaterias(id, materiasIds || []);
       res.json({ id });
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
+  },
+
+  async agregarMateria(req, res, next) {
+    try {
+      const { materiaId } = req.body;
+      if (!materiaId) return res.status(400).json({ error: 'materiaId requerido' });
+      await repo.agregarMateria(req.params.id, materiaId);
+      res.json({ ok: true });
+    } catch (err) { next(err); }
+  },
+
+  async quitarMateria(req, res, next) {
+    try {
+      await repo.quitarMateria(req.params.id, req.params.materiaId);
+      res.json({ ok: true });
+    } catch (err) { next(err); }
   },
 
   async eliminar(req, res, next) {
     try {
-      const { id } = req.params;
-      const db = require("../../config/db").getDB();
-      await new Promise((resolve, reject) => {
-        db.run(
-          `DELETE FROM inscripcion_materia WHERE inscripcion_id = ?`,
-          [id],
-          function (err) {
-            if (err) return reject(err);
-            resolve();
-          }
-        );
-      });
-      await new Promise((resolve, reject) => {
-        db.run(`DELETE FROM inscripciones WHERE id = ?`, [id], function (err) {
-          db.close();
-          if (err) return reject(err);
-          resolve();
-        });
-      });
+      await repo.eliminar(req.params.id);
       res.json({ ok: true });
-    } catch (err) {
-      next(err);
-    }
+    } catch (err) { next(err); }
   },
 };
