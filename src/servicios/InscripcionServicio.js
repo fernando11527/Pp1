@@ -69,37 +69,20 @@ class InscripcionServicio {
 
   // Verifica si el alumno ya tiene una inscripcion en el periodo dado
   async verificarInscripcionEnPeriodo(alumnoId, periodoId) {
-    const db = require("../config/db").getDB();
-    const sql = `SELECT id FROM inscripciones WHERE alumnoId = ? AND periodoId = ? LIMIT 1`;
-    const resultado = await new Promise((resolve, reject) => {
-      db.get(sql, [alumnoId, periodoId], (err, row) => {
-        db.close();
-        if (err) return reject(err);
-        resolve(row || null);
-      });
-    });
-    return resultado; // Devuelve la inscripcion si existe, o null si no
+    return inscripcionRepo.buscarPorAlumnoYPeriodo(alumnoId, periodoId);
   }
 
   // Busca todas las correlativas de una materia (recursivo, para evitar bucles)
   async obtenerCorrelativasRecursivas(materiaId, visitados = new Set()) {
-    if (visitados.has(materiaId)) return []; // Si ya la reviso, no repite
+    if (visitados.has(materiaId)) return [];
     visitados.add(materiaId);
-    const db = require("../config/db").getDB();
-    const sql = `SELECT correlativa_id FROM correlativas WHERE materia_id = ?`;
-    const filas = await new Promise((resolve, reject) => {
-      db.all(sql, [materiaId], (err, rows) => {
-        db.close();
-        if (err) return reject(err);
-        resolve(rows || []);
-      });
-    });
+    const filas = await materiaRepo.listarCorrelativasDe(materiaId);
     let resultado = [];
     for (const f of filas) {
       const id = f.correlativa_id;
       resultado.push(id);
       const sub = await this.obtenerCorrelativasRecursivas(id, visitados);
-      resultado = resultado.concat(sub); // Agrega las correlativas de las correlativas
+      resultado = resultado.concat(sub);
     }
     return resultado;
   }
@@ -149,18 +132,7 @@ class InscripcionServicio {
     const inscripcionId = await inscripcionRepo.crear(inscripcion);
 
     // Agrega las materias a la inscripcion
-    const db = require("../config/db").getDB();
-    await new Promise((resolve, reject) => {
-      const stmt = db.prepare(
-        `INSERT INTO inscripcion_materia (inscripcion_id, materia_id) VALUES (?,?)`
-      );
-      for (const mid of materiasIds) stmt.run(inscripcionId, mid);
-      stmt.finalize((err) => {
-        db.close();
-        if (err) return reject(err);
-        resolve();
-      });
-    });
+    await inscripcionRepo.agregarMaterias(inscripcionId, materiasIds);
 
     // Crea el registro de MateriaAprobada con estado INSCRIPTO para cada materia
     for (const mid of materiasIds) {

@@ -66,6 +66,28 @@ class InscripcionRepositorio extends BaseRepositorio {
     ins.materias = materias;
     return ins;
   }
+
+  // Verifica si ya existe una inscripción para el alumno en el periodo
+  buscarPorAlumnoYPeriodo(alumnoId, periodoId) {
+    const sql = `SELECT id FROM inscripciones WHERE alumnoId = ? AND periodoId = ? LIMIT 1`;
+    return this.obtenerUno(sql, [alumnoId, periodoId]);
+  }
+
+  // Inserta las materias de una inscripción en la tabla intermedia
+  agregarMaterias(inscripcionId, materiasIds) {
+    const db = require('../config/db').getDB();
+    return new Promise((resolve, reject) => {
+      const stmt = db.prepare(
+        `INSERT INTO inscripcion_materia (inscripcion_id, materia_id) VALUES (?,?)`
+      );
+      for (const mid of materiasIds) stmt.run(inscripcionId, mid);
+      stmt.finalize((err) => {
+        db.close();
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+  }
 }
 
 module.exports = InscripcionRepositorio;

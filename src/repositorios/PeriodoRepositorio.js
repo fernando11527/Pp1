@@ -29,6 +29,12 @@ class PeriodoRepositorio extends BaseRepositorio {
     const sql = `SELECT * FROM periodos WHERE id = ?`;
     return this.obtenerUno(sql, [id]);
   }
+
+  // Devuelve todos los periodos
+  listar() {
+    const sql = `SELECT * FROM periodos`;
+    return this.obtenerTodos(sql);
+  }
 }
 
 module.exports = PeriodoRepositorio;

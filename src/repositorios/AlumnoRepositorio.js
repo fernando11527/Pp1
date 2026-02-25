@@ -56,6 +56,48 @@ class AlumnoRepositorio extends BaseRepositorio {
     const sql = `SELECT * FROM alumnos`;
     return this.obtenerTodos(sql);
   }
+
+  // Busca un alumno por id y adjunta materiasAprobadas, inscripciones y carreras
+  async buscarConRelacionados(id) {
+    const alumno = await this.obtenerPorId(id);
+    if (!alumno) return null;
+    alumno.materiasAprobadas = await this.listarMateriasAprobadas(id);
+    alumno.inscripciones     = await this.listarInscripciones(id);
+    alumno.carreras          = await this.listarCarrerasDeAlumno(id);
+    return alumno;
+  }
+
+  // Materias aprobadas con nombre de materia y profesor
+  listarMateriasAprobadas(alumnoId) {
+    const sql = `
+      SELECT ma.*,
+             m.nombre AS materiaNombre,
+             p.nombre AS profesorNombre,
+             p.apellido AS profesorApellido
+      FROM materias_aprobadas ma
+      JOIN materias m ON ma.materiaId = m.id
+      LEFT JOIN profesores p ON ma.profesorId = p.id
+      WHERE ma.alumnoId = ?
+    `;
+    return this.obtenerTodos(sql, [alumnoId]);
+  }
+
+  // Inscripciones del alumno
+  listarInscripciones(alumnoId) {
+    const sql = `SELECT * FROM inscripciones WHERE alumnoId = ?`;
+    return this.obtenerTodos(sql, [alumnoId]);
+  }
+
+  // Carreras en las que el alumno está inscripto
+  listarCarrerasDeAlumno(alumnoId) {
+    const sql = `
+      SELECT c.id, c.nombre
+      FROM alumno_carrera ac
+      JOIN carreras c ON ac.carrera_id = c.id
+      WHERE ac.alumno_id = ?
+    `;
+    return this.obtenerTodos(sql, [alumnoId]);
+  }
 }
 
 module.exports = AlumnoRepositorio;

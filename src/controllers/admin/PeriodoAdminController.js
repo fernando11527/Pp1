@@ -4,9 +4,7 @@ const repo = new PeriodoRepositorio();
 module.exports = {
   async listar(req, res, next) {
     try {
-      const lista = (await repo.obtenerTodos)
-        ? await repo.obtenerTodos()
-        : await repo.obtenerActivo();
+      const lista = await repo.listar();
       res.json(lista);
     } catch (err) {
       next(err);

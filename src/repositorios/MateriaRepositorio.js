@@ -43,6 +43,12 @@ class MateriaRepositorio extends BaseRepositorio {
     const sql = `SELECT * FROM materias`;
     return this.obtenerTodos(sql);
   }
+
+  // Correlativas directas de una materia
+  listarCorrelativasDe(materiaId) {
+    const sql = `SELECT correlativa_id FROM correlativas WHERE materia_id = ?`;
+    return this.obtenerTodos(sql, [materiaId]);
+  }
 }
 
 module.exports = MateriaRepositorio;
