@@ -16,6 +16,7 @@ Esta guia explica paso a paso como configurar, probar y usar el sistema de inscr
 
 ## Como iniciar el sistema
 
+0. Para pruebas en LOCAL eliminar en "script.js" del FRONTEND (PP1WEB) el API URL y descomentar la otra 
 1. Abrir la consola de Windows en la carpeta del proyecto
 2. Ejecutar:
 
@@ -102,6 +103,13 @@ curl -X POST http://localhost:3000/api/inscripciones -H "Content-Type: applicati
 ```
 
 El backend volvera a validar todo. Si esta correcto, creara la inscripcion y devolvera el registro creado.
+
+### 7) Ejecutar Resummen 
+
+```
+curl -s -X GET http://localhost:3000/api/admin/resumen -H "Accept: application/json"
+```
+
 
 ---
 
