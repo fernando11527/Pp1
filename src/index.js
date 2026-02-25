@@ -63,6 +63,14 @@ app.use("/api/materias_aprobadas", materiasAprobadasPublic);
 // Ayudante para manejar errores (debe ir al final de las rutas): si algo sale mal, muestra un mensaje y no rompe todo
 app.use(errorHandler);
 
+// Handlers globales: evitan que el proceso muera ante errores no capturados
+process.on('uncaughtException', (err) => {
+  console.error('[uncaughtException] El servidor siguió corriendo:', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection] El servidor siguió corriendo:', reason);
+});
+
 // Inicializa la base de datos y arranca el servidor: primero prepara la base de datos y despues empieza a escuchar pedidos
 inicializarDB()
   .then(() => {
