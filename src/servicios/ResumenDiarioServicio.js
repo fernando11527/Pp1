@@ -4,10 +4,12 @@
 
 const InscripcionRepositorio = require("../repositorios/InscripcionRepositorio");
 const CarreraRepositorio = require("../repositorios/CarreraRepositorio");
+const PeriodoRepositorio = require("../repositorios/PeriodoRepositorio");
 const EmailService = require("./EmailService");
 
 const inscripcionRepo = new InscripcionRepositorio();
 const carreraRepo = new CarreraRepositorio();
+const periodoRepo = new PeriodoRepositorio();
 
 class ResumenDiarioServicio {
   constructor() {
@@ -36,18 +38,31 @@ class ResumenDiarioServicio {
   // Cuenta cuantas inscripciones hay por carrera en el dia
   async contarInscripcionesPorCarrera(inscripciones) {
     const carreras = await carreraRepo.listar();
+    const periodos = await periodoRepo.listar();
+
+    // Mapa periodoId -> carrera_id
+    const periodoACarrera = {};
+    periodos.forEach((p) => {
+      periodoACarrera[p.id] = p.carrera_id;
+    });
+
+    // Mapa carreraId -> nombre, inicializa conteo en 0
+    const carreraNombre = {};
     const conteo = {};
-    
-    // Inicializa el conteo en 0 para todas las carreras
     carreras.forEach((c) => {
+      carreraNombre[c.id] = c.nombre;
       conteo[c.nombre] = 0;
     });
-    
-    // Cuenta inscripciones por carrera
-    // Nota: esto requiere que las inscripciones tengan una relacion con carrera
-    // Por ahora contamos el total ya que no guardamos carreraId en inscripciones
-    // (esto se puede mejorar guardando carreraId en la tabla inscripciones)
-    
+
+    // Cuenta inscripciones por carrera via periodoId -> carrera_id
+    inscripciones.forEach((ins) => {
+      const carreraId = periodoACarrera[ins.periodoId];
+      const nombre = carreraNombre[carreraId];
+      if (nombre !== undefined) {
+        conteo[nombre]++;
+      }
+    });
+
     return {
       total: inscripciones.length,
       carreras: conteo,
@@ -93,17 +108,17 @@ class ResumenDiarioServicio {
     }
   }
 
-  // Inicia el cron job para enviar el resumen todos los dias a las 23:00
+  // Inicia el cron job para enviar el resumen todos los dias a las 21:00
   iniciarCronJob() {
     const cron = require("node-cron");
     
-    // Ejecuta todos los dias a las 23:00 hs
-    cron.schedule("0 23 * * *", async () => {
+    // Ejecuta todos los dias a las 21:00 hs
+    cron.schedule("0 21 * * *", async () => {
       console.log("[ResumenDiarioServicio] Ejecutando tarea programada...");
       await this.enviarResumenDiario();
     });
     
-    console.log("[ResumenDiarioServicio] Tarea programada configurada para las 23:00 hs");
+    console.log("[ResumenDiarioServicio] Tarea programada configurada para las 21:00 hs");
   }
 }
 
