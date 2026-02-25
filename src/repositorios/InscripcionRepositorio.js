@@ -83,8 +83,16 @@ class InscripcionRepositorio extends BaseRepositorio {
     );
   }
 
-  // Elimina una inscripción y sus materias asociadas
+  // Elimina una inscripción, sus materias asociadas y los registros INSCRIPTO de materias_aprobadas
   async eliminar(id) {
+    // Limpia los registros materias_aprobadas con estado INSCRIPTO que pertenecen a esta inscripción
+    await this.ejecutar(
+      `DELETE FROM materias_aprobadas
+       WHERE estado = 'INSCRIPTO'
+         AND alumnoId = (SELECT alumnoId FROM inscripciones WHERE id = ?)
+         AND materiaId IN (SELECT materia_id FROM inscripcion_materia WHERE inscripcion_id = ?)`,
+      [id, id]
+    );
     await this.ejecutar(`DELETE FROM inscripcion_materia WHERE inscripcion_id = ?`, [id]);
     return this.ejecutar(`DELETE FROM inscripciones WHERE id = ?`, [id]);
   }
