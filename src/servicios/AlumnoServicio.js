@@ -2,11 +2,8 @@
 // "Servicio" significa que hace el trabajo de buscar y armar los datos
 
 const AlumnoRepositorio = require("../repositorios/AlumnoRepositorio"); // para buscar alumnos en la base de datos
-const MateriaRepositorio = require("../repositorios/MateriaRepositorio"); // para buscar materias
-const MateriaAprobada = require("../modelos/MateriaAprobada"); // modelo de materia aprobada
 
 const alumnoRepo = new AlumnoRepositorio();
-const materiaRepo = new MateriaRepositorio();
 
 class AlumnoServicio {
   // Busca un alumno por DNI y le agrega toda la info relacionada
